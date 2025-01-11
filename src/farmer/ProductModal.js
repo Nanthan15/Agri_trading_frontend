@@ -64,24 +64,34 @@ const ProductModal = ({ open, onClose, productData }) => {
   };
 
   try {
+    const formData = new FormData();
+    formData.append('id', prodId);
+    formData.append('products', JSON.stringify(productData));
+
+    // If you have an image to upload:
+    if (productData.prodImage) {
+        formData.append('prodImage', productData.prodImage, productData.prodImage.name);
+    }
+
     const response = await fetch(`http://localhost:5456/farmers/product?id=${prodId}`, {
-      method: 'PUT' , 
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body :JSON.stringify(productData),
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
     });
+
     const responseData = await response.json();
 
     if (!response.ok) {
         throw new Error(responseData.message || 'Failed to edit product');
     }
 
-    alert('Product edited successfully!');
-  } catch (error) {
+    window.location.reload();
+} catch (error) {
     console.error('Error:', error);
     alert('Failed to edit Product. Please try again.');
-  }
+}
     
   };
 

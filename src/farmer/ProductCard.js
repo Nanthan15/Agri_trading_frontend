@@ -12,6 +12,11 @@ import { red, grey, green } from '@mui/material/colors';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, alpha } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import ProductModal from './ProductModal';
 
 // Styled ExpandMore Component (unused in this snippet but kept for potential future use)
@@ -31,6 +36,17 @@ export default function ProductCard({ product }) {
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const navigate = useNavigate();
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleClickOpen = (product) => {
+    setOpenDialog(true);
+    setSelectedProduct(product);
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
+
 
   useEffect(() => {
     const savedToken = localStorage.getItem('authToken');
@@ -46,6 +62,32 @@ export default function ProductCard({ product }) {
     setSelectedProduct(product);
     setOpen(true);
   };
+
+  const handleDeleteClick = async() =>{
+    console.log(product);
+    const prodId = selectedProduct.prod_id;
+    try {
+     
+      const response = await fetch(`http://localhost:5456/farmers/product?id=${prodId}`, {
+          method: 'DELETE',
+          headers: {
+              Authorization: `Bearer ${token}`,
+          }
+      });
+  
+      const responseData = await response.json();
+  
+      if (!response.ok) {
+          throw new Error(responseData.message || 'Failed to Delete product');
+      }
+      window.location.reload();
+  
+      alert('Product Deleted successfully!');
+  } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to delete Product. Please try again.');
+  }
+  }
 
   const getImageUrl = (imageName) => {
     return `http://localhost:5456${imageName}`;
@@ -122,19 +164,41 @@ export default function ProductCard({ product }) {
           </Button>
 
           <Button 
-            variant='outlined' 
-            color='error'
-            sx={{
-              borderColor: red[500],
-              color: red[500],
-              '&:hover': {
-                borderColor: red[700],
-                backgroundColor: alpha(red[500], 0.08),
-              }
-            }}
-          >
+        variant='outlined' 
+        color='error'
+        sx={{
+          borderColor: red[500],
+          color: red[500],
+          '&:hover': {
+            borderColor: red[700],
+            backgroundColor: alpha(red[500], 0.08),
+          }
+        }}
+        onClick={() => {handleClickOpen(product)}}
+      >
+        Delete
+      </Button>
+      <Dialog
+        open={openDialog}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirm Deletion"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this product?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleDeleteClick} autoFocus color="error">
             Delete
           </Button>
+        </DialogActions>
+      </Dialog>
         </Box>
 
         <ProductModal

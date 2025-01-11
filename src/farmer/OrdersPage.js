@@ -9,14 +9,83 @@ import { Typography, Accordion, AccordionSummary, AccordionDetails, Box , Chip
  } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../components/compo/nav';
+import NavBar from '../components/compo/nav';import DeleteIcon from '@mui/icons-material/Delete';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Orders = ({ orders }) => {
     const [filterStatus, setFilterStatus] = useState('PENDING');
-  
+    const [openDialog, setOpenDialog] = useState(false);
+
+   const [token, setToken] = useState(null);
+     const navigate = useNavigate();
     const handleChange = (event, newValue) => {
       setFilterStatus(newValue);
     };
+
+    const handleClose = () => {
+      setOpenDialog(false);
+    };
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    useEffect(() => {
+                    const savedToken = localStorage.getItem('authToken');
+                    if (savedToken) {
+                        setToken(savedToken);
+                    } else {
+                        alert('No token found. Please log in first.');
+                        navigate('/login');
+                    }
+                }, [navigate]);
+
+    const handleMarkAsCompleteButton = async(orderId) =>{
+      try {
+        
+        const response = await fetch(`http://localhost:5456/orders/status?orderId=${orderId}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    
+        const responseData = await response.json();
+    
+        if (!response.ok) {
+            throw new Error(responseData.message || 'Failed to edit product');
+        }
+    
+        window.location.reload();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to edit Product. Please try again.');
+    }
+    }
+
+    const handleDeleteIconClick = (orderId) =>{
+      setOpenDialog(true);
+      setSelectedOrder(orderId);
+    }
+
+    const handleDeleteOrder = async() =>{
+
+      try {
+        
+        const response = await fetch(`http://localhost:5456/orders?id=${selectedOrder}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    
+    
+        window.location.reload();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to edit Product. Please try again.');
+    }
+    }
   
     const filteredOrders = orders.filter(order => {
       if (filterStatus === 'ALL') return true;
@@ -84,6 +153,11 @@ const Orders = ({ orders }) => {
               size="small"
             />
           </Box>
+          <DeleteIcon sx={{
+            marginLeft:'10px'
+          }}
+          color='error'
+          onClick={()=>{handleDeleteIconClick(order.orderId)}}></DeleteIcon>
         </AccordionSummary>
 
         {/* Order Details */}
@@ -101,11 +175,35 @@ const Orders = ({ orders }) => {
             <strong>Status:</strong> {order.orderStatus}
           </Typography>
           <Stack alignContent={'end'}>
-          <Button variant='outlined' sx={{
+          {order.orderStatus=== 'COMPLETED' ? (<></>):( <Button variant='outlined' sx={{
             maxHeight:'30px'
-          }}>
+          }}
+          onClick={()=> handleMarkAsCompleteButton(order.orderId)}>
             MARK AS COMPLETED
+          </Button>)}
+
+          <Dialog
+        open={openDialog}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirm Deletion"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this product?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleDeleteOrder} autoFocus color="error">
+            Delete
           </Button>
+        </DialogActions>
+      </Dialog>
+         
           </Stack>
           
             </Stack>
