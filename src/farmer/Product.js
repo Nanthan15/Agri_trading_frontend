@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/compo/nav';
+import ProductCard from './ProductCard';
+import { Divider, Stack, Typography } from '@mui/material';
+import ProductGrid from './ProductGrid';
+import { red } from '@mui/material/colors';
+
 
 const Product = () => {
   const [productId, setProductId] = useState('');
@@ -49,6 +54,7 @@ const Product = () => {
       const data = await response.json();
       if (response.ok && data.status === 201) {
         setAllProducts(data.productList || []);
+        console.log(allProducts);
       } else {
         throw new Error(data.message || 'Failed to fetch products');
       }
@@ -74,62 +80,18 @@ const Product = () => {
 
   return (
     <>
-      <NavBar />
-      <div className="container mt-5">
-        <div className="row">
-          <div className="col-md-6">
-            <h2>Search Product by ID</h2>
-            <form onSubmit={handleSearch}>
-              <div className="form-group mb-3">
-                <label>Product ID:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={productId}
-                  onChange={(e) => setProductId(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary">Search</button>
-            </form>
-            {product && (
-              <div className="mt-3">
-                <h3>Product Details</h3>
-                <img
-                  src={getImageUrl(product.prod_Img)}
-                  alt={product.prod_Name}
-                  className="img-fluid mb-3"
-                />
-                <p><strong>Name:</strong> {product.prod_Name}</p>
-                <p><strong>Description:</strong> {product.prod_Description}</p>
-                <p><strong>Category:</strong> {product.category}</p>
-                <p><strong>Stock:</strong> {product.prod_Stock}</p>
-                <p><strong>Quantity:</strong> {product.prod_Quantity}</p>
-                <p><strong>Price:</strong> {product.prod_Price}</p>
-                <p><strong>Listing Date:</strong> {product.listing_Date}</p>
-              </div>
-            )}
-          </div>
-          <div className="col-md-6">
-            <h2>All Products</h2>
-            <div className="list-group">
-              {allProducts.map((prod) => (
-                <div key={prod.prod_id} className="list-group-item">
-                  <img
-                    src={getImageUrl(prod.prod_Img)}
-                    alt={prod.prod_Name}
-                    className="img-fluid mb-3"
-                  />
-                  <h5>{prod.prod_Name}</h5>
-                  <p>{prod.prod_Description}</p>
-                  <p><strong>Price:</strong> {prod.prod_Price}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+  <NavBar />
+  <Stack >
+  
+    <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold',mt:'10px', textAlign: 'center'}}>
+    Products ({allProducts.length})
+        </Typography>
+    <Divider sx={{
+      height:'3px',
+    }}></Divider>
+    <ProductGrid allProducts={allProducts} />
+  </Stack>
+</>
   );
 };
 

@@ -41,11 +41,12 @@ const NavBar = () => {
             </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="/add-product">Add-product</a>
+            <a className="nav-link" href="/products">Products</a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="/products">Product</a>
+            <a className="nav-link" href="/orders">Orders</a>
           </li>
+          
         </ul>
         <ul className="navbar-nav ms-auto" style={{ marginRight: '13px' }}>
           <li className="nav-item">
