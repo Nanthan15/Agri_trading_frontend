@@ -46,6 +46,9 @@ const NavBar = () => {
           <li className="nav-item">
             <a className="nav-link" href="/orders">Orders</a>
           </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/profile">Profile</a>
+          </li>
           
         </ul>
         <ul className="navbar-nav ms-auto" style={{ marginRight: '13px' }}>
